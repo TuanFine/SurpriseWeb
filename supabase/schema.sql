@@ -1,56 +1,69 @@
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Gifts table
 CREATE TABLE IF NOT EXISTS gifts (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  slug TEXT NOT NULL UNIQUE,
-  edit_token TEXT NOT NULL UNIQUE,
-  recipient_name TEXT NOT NULL,
-  sender_name TEXT NOT NULL,
-  theme TEXT NOT NULL DEFAULT 'pink' CHECK (theme IN ('pink', 'merah', 'kuning', 'biru', 'putih', 'campur')),
-  lock_question TEXT,
-  lock_answer TEXT,
-  greeting TEXT NOT NULL DEFAULT '',
-  letter TEXT NOT NULL DEFAULT '',
-  photos JSONB NOT NULL DEFAULT '[]'::jsonb,
-  music_url TEXT,
-  expires_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug text UNIQUE NOT NULL,
+  edit_token text UNIQUE NOT NULL,
+  recipient_name text NOT NULL,
+  sender_name text,
+  theme text CHECK (theme IN ('pink', 'merah', 'kuning', 'biru', 'putih', 'campur')),
+  lock_question text,
+  lock_answer text,
+  greeting text,
+  letter text,
+  photos jsonb DEFAULT '[]',
+  music_url text,
+  expires_at timestamptz,
+  created_at timestamptz DEFAULT now()
 );
 
--- Reactions table
 CREATE TABLE IF NOT EXISTS reactions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  gift_id UUID NOT NULL REFERENCES gifts(id) ON DELETE CASCADE,
-  visitor_name TEXT NOT NULL DEFAULT 'Anonymous',
-  message TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  gift_id uuid REFERENCES gifts(id) ON DELETE CASCADE,
+  message text NOT NULL,
+  created_at timestamptz DEFAULT now()
 );
 
--- Create indexes
-CREATE INDEX IF NOT EXISTS idx_gifts_slug ON gifts(slug);
-CREATE INDEX IF NOT EXISTS idx_gifts_created_at ON gifts(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_reactions_gift_id ON reactions(gift_id);
-CREATE INDEX IF NOT EXISTS idx_reactions_created_at ON reactions(created_at DESC);
-
--- Enable Row Level Security
 ALTER TABLE gifts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reactions ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for gifts table
-CREATE POLICY "gifts_select_public" ON gifts
-  FOR SELECT USING (true);
+CREATE POLICY "Public can read gifts by slug" ON gifts
+  FOR SELECT
+  USING (true);
 
-CREATE POLICY "gifts_insert_public" ON gifts
-  FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public can insert gifts" ON gifts
+  FOR INSERT
+  WITH CHECK (true);
 
-CREATE POLICY "gifts_update_by_edit_token" ON gifts
-  FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "Public can update gifts by edit token" ON gifts
+  FOR UPDATE
+  USING (true)
+  WITH CHECK (true);
 
--- RLS Policies for reactions table
-CREATE POLICY "reactions_insert_public" ON reactions
-  FOR INSERT WITH CHECK (true);
+CREATE POLICY "No delete for gifts" ON gifts
+  FOR DELETE
+  USING (false);
 
-CREATE POLICY "reactions_select_public" ON reactions
-  FOR SELECT USING (true);
+CREATE POLICY "Public can insert reactions" ON reactions
+  FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Only service role can read reactions" ON reactions
+  FOR SELECT
+  USING (false);
+
+CREATE POLICY "Only service role can update reactions" ON reactions
+  FOR UPDATE
+  USING (false);
+
+CREATE POLICY "Only service role can delete reactions" ON reactions
+  FOR DELETE
+  USING (false);
+
+CREATE OR REPLACE FUNCTION public.update_modified_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.created_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;

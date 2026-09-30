@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Laubloom icon">
+  <defs>
+    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#fdf2f8" />
+      <stop offset="100%" stop-color="#fbcfe8" />
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="24" fill="url(#bg)" />
+  <circle cx="64" cy="48" r="18" fill="#f9a8d4" />
+  <circle cx="45" cy="58" r="16" fill="#f472b6" />
+  <circle cx="83" cy="58" r="16" fill="#ec4899" />
+  <circle cx="52" cy="35" r="16" fill="#f9a8d4" />
+  <circle cx="76" cy="35" r="16" fill="#f9a8d4" />
+  <path d="M64 72 L64 104" stroke="#8b5e3c" stroke-width="8" stroke-linecap="round" />
+  <path d="M60 94 C56 86, 52 82, 48 80" stroke="#d97706" stroke-width="6" stroke-linecap="round" fill="none" />
+  <path d="M68 94 C72 86, 76 82, 80 80" stroke="#d97706" stroke-width="6" stroke-linecap="round" fill="none" />
+</svg>

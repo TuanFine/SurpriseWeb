@@ -1,14 +1,17 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "SurpriseWeb",
-  description: "A beautiful digital gift experience built with Next.js and Supabase.",
+  title: 'Laubloom Clone',
+  description: 'Kado digital yang mekar saat dibuka.',
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="id">
       <body>{children}</body>
     </html>
   );
